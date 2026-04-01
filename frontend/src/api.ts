@@ -1,7 +1,7 @@
 // src/api.ts
 // Client API centralisé — toutes les communications avec le backend
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://medwork-cbg-backend-production.up.railway.app';
+const BASE_URL = (import.meta.env.VITE_API_URL || 'https://medwork-cbg-backend-production.up.railway.app') + '/api';
 
 export function getToken(): string | null {
   return localStorage.getItem("medwork_token");
