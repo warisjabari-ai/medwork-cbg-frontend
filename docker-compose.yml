@@ -1,0 +1,54 @@
+version: "3.9"
+
+# ─── MédWork CBG — Stack complète ─────────────────────────────────────────────
+# Lance PostgreSQL + Backend en une seule commande : docker compose up
+
+services:
+
+  # ── Base de données PostgreSQL ───────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: medwork-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: medwork2026
+      POSTGRES_DB: medwork_cbg
+    ports:
+      - "5432:5432"          # accessible depuis ton PC sur localhost:5432
+    volumes:
+      - medwork_data:/var/lib/postgresql/data   # données persistantes
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend Node.js ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medwork-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy   # attend que PostgreSQL soit prêt
+    environment:
+      DATABASE_URL: "postgresql://postgres:medwork2026@db:5432/medwork_cbg"
+      JWT_SECRET: "medwork-cbg-secret-changez-moi"
+      JWT_EXPIRES_IN: "8h"
+      PORT: 3001
+      NODE_ENV: development
+      UPLOAD_DIR: "/app/uploads"
+    ports:
+      - "3001:3001"          # API accessible sur http://localhost:3001
+    volumes:
+      - ./backend:/app        # recharge le code automatiquement
+      - /app/node_modules     # garde les node_modules du conteneur
+      - medwork_uploads:/app/uploads  # fichiers uploadés persistants
+
+# ─── Volumes persistants ──────────────────────────────────────────────────────
+volumes:
+  medwork_data:      # données PostgreSQL
+  medwork_uploads:   # photos et signatures uploadées
