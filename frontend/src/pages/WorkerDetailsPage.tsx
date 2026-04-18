@@ -10,7 +10,17 @@ import type {
 import { emptyForm, generateVisitRef } from "../types/visit";
 
 // ─── Types locaux ─────────────────────────────────────────────────────────────
-type Worker = { id: number; name: string; matricule: string; department: string; position: string; company: string; status: string; lastVisit: string; residence?: string };
+type ProfessionalEntry = {
+  id: number; startDate: string; endDate?: string;
+  position: string; department: string; company?: string;
+  reason: "embauche" | "promotion" | "mutation" | "redéploiement_médical" | "redéploiement_professionnel" | "autre";
+  notes?: string;
+};
+type Worker = {
+  id: number; name: string; matricule: string; department: string; position: string;
+  company: string; status: string; lastVisit: string; residence?: string;
+  bloodGroup?: string; professionalHistory?: ProfessionalEntry[];
+};
 type PrintDocType = "compte-rendu" | "certificat" | "ordonnance";
 
 type Props = {
@@ -667,6 +677,201 @@ function InfoRow({ label, value, badge = false }: { label: string; value: string
 function AlertRow({ text, color = "orange" }: { text: string; color?: "orange" | "red" }) {
   return <div className={`px-4 py-2 text-xs ${color === "red" ? "border-l-4 border-red-500 bg-red-50 text-red-700" : "border-l-4 border-orange-500 bg-orange-50 text-orange-700"}`}>{text}</div>;
 }
+
+// ─── Groupage sanguin ──────────────────────────────────────────────────────────
+function BloodGroupCard({ worker, onUpdate }: { worker: Worker; onUpdate: (bloodGroup: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(worker.bloodGroup || "");
+  const GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Inconnu"];
+  const inp = "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs outline-none focus:border-medwork-cyan focus:ring-1 focus:ring-medwork-cyan/20";
+
+  const handleSave = async () => {
+    try {
+      const { workersAPI } = await import("../api");
+      await workersAPI.update(worker.id, { bloodGroup: value });
+      onUpdate(value);
+      setEditing(false);
+    } catch (e) { console.error(e); }
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-50 text-sm">🩸</span>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Groupage sanguin</h3>
+        </div>
+        <button onClick={() => setEditing(v => !v)}
+          className="rounded-lg bg-medwork-cyan/10 px-2.5 py-1 text-[10px] font-bold text-medwork-cyan hover:bg-medwork-cyan/20 transition">
+          {editing ? "✕" : "✏️"}
+        </button>
+      </div>
+      {editing ? (
+        <div className="p-4 space-y-2 bg-slate-50 border-b border-slate-100">
+          <select value={value} onChange={e => setValue(e.target.value)} className={inp}>
+            <option value="">-- Sélectionner --</option>
+            {GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <button onClick={handleSave} className="w-full rounded-lg bg-medwork-cyan py-1.5 text-xs font-bold text-white hover:opacity-90 transition">
+            Enregistrer
+          </button>
+        </div>
+      ) : null}
+      <div className="px-4 py-4 flex items-center justify-center">
+        {worker.bloodGroup ? (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-3xl font-bold text-red-600">{worker.bloodGroup}</span>
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Groupe sanguin</span>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 text-center">Groupe sanguin non renseigné</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Antécédents professionnels ────────────────────────────────────────────────
+const REASON_LABELS: Record<ProfessionalEntry["reason"], string> = {
+  embauche: "Embauche",
+  promotion: "Promotion",
+  mutation: "Mutation",
+  redéploiement_médical: "Redéploiement médical",
+  redéploiement_professionnel: "Redéploiement professionnel",
+  autre: "Autre",
+};
+
+const REASON_COLORS: Record<ProfessionalEntry["reason"], string> = {
+  embauche: "bg-blue-50 text-blue-700 ring-blue-200",
+  promotion: "bg-green-50 text-green-700 ring-green-200",
+  mutation: "bg-purple-50 text-purple-700 ring-purple-200",
+  redéploiement_médical: "bg-orange-50 text-orange-700 ring-orange-200",
+  redéploiement_professionnel: "bg-amber-50 text-amber-700 ring-amber-200",
+  autre: "bg-slate-100 text-slate-600 ring-slate-200",
+};
+
+function ProfessionalHistoryCard({ worker, onUpdate }: { worker: Worker; onUpdate: (history: ProfessionalEntry[]) => void }) {
+  const [items, setItems] = useState<ProfessionalEntry[]>(worker.professionalHistory || []);
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [form, setForm] = useState<Omit<ProfessionalEntry, "id">>({
+    startDate: "", endDate: "", position: "", department: "", company: worker.company || "",
+    reason: "embauche", notes: "",
+  });
+
+  const inp = "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs outline-none focus:border-medwork-cyan focus:ring-1 focus:ring-medwork-cyan/20";
+
+  const saveToBackend = async (newItems: ProfessionalEntry[]) => {
+    try {
+      const { workersAPI } = await import("../api");
+      await workersAPI.update(worker.id, { professionalHistory: newItems });
+      onUpdate(newItems);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleSubmit = async () => {
+    if (!form.position.trim() || !form.startDate) return;
+    let newItems: ProfessionalEntry[];
+    if (editId !== null) {
+      newItems = items.map(i => i.id === editId ? { ...form, id: editId } : i);
+    } else {
+      const newEntry: ProfessionalEntry = { ...form, id: Date.now() };
+      newItems = [...items, newEntry];
+    }
+    setItems(newItems);
+    await saveToBackend(newItems);
+    setForm({ startDate: "", endDate: "", position: "", department: "", company: worker.company || "", reason: "embauche", notes: "" });
+    setEditId(null);
+    setShowForm(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    const newItems = items.filter(i => i.id !== id);
+    setItems(newItems);
+    await saveToBackend(newItems);
+  };
+
+  const sorted = [...items].sort((a, b) => (b.startDate > a.startDate ? 1 : -1));
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-sm">💼</span>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Parcours professionnel</h3>
+        </div>
+        <button onClick={() => { setShowForm(v => !v); setEditId(null); setForm({ startDate: "", endDate: "", position: "", department: "", company: worker.company || "", reason: "embauche", notes: "" }); }}
+          className="rounded-lg bg-medwork-cyan/10 px-2.5 py-1 text-[10px] font-bold text-medwork-cyan hover:bg-medwork-cyan/20 transition">
+          {showForm ? "✕ Annuler" : "+ Ajouter"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="border-b border-slate-100 bg-slate-50 p-4 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-[10px] font-semibold text-slate-400 mb-1">Début</p>
+              <input type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} className={inp} />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-slate-400 mb-1">Fin (optionnel)</p>
+              <input type="date" value={form.endDate || ""} onChange={e => setForm({ ...form, endDate: e.target.value })} className={inp} />
+            </div>
+          </div>
+          <input type="text" placeholder="Poste occupé" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} className={inp} />
+          <input type="text" placeholder="Département / Service" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} className={inp} />
+          <select value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value as ProfessionalEntry["reason"] })} className={inp}>
+            {(Object.entries(REASON_LABELS) as [ProfessionalEntry["reason"], string][]).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+          {(form.reason === "redéploiement_médical" || form.reason === "redéploiement_professionnel") && (
+            <textarea placeholder="Motif du redéploiement…" value={form.notes || ""} onChange={e => setForm({ ...form, notes: e.target.value })} className={`${inp} h-16 resize-none`} />
+          )}
+          <button onClick={handleSubmit} className="w-full rounded-lg bg-medwork-cyan py-1.5 text-xs font-bold text-white hover:opacity-90 transition">
+            {editId !== null ? "Modifier" : "Enregistrer"}
+          </button>
+        </div>
+      )}
+
+      <div>
+        {items.length === 0 ? (
+          <p className="px-4 py-4 text-xs text-slate-400 text-center">Aucun parcours enregistré</p>
+        ) : sorted.map((entry, idx) => (
+          <div key={entry.id} className="border-t border-slate-100 px-4 py-3 hover:bg-slate-50/60 group">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs font-semibold text-slate-800">{entry.position}</p>
+                  {idx === 0 && !entry.endDate && (
+                    <span className="shrink-0 rounded-full bg-green-50 px-2 py-0.5 text-[9px] font-bold text-green-700 ring-1 ring-green-200">Actuel</span>
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5">{entry.department}{entry.company && entry.company !== worker.company ? ` — ${entry.company}` : ""}</p>
+                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${REASON_COLORS[entry.reason]}`}>
+                    {REASON_LABELS[entry.reason]}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {entry.startDate}{entry.endDate ? ` → ${entry.endDate}` : " → aujourd'hui"}
+                  </span>
+                </div>
+                {entry.notes && (
+                  <p className="text-[10px] text-slate-500 mt-1 italic">{entry.notes}</p>
+                )}
+              </div>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                <button onClick={() => { setForm({ startDate: entry.startDate, endDate: entry.endDate || "", position: entry.position, department: entry.department, company: entry.company || "", reason: entry.reason, notes: entry.notes || "" }); setEditId(entry.id); setShowForm(true); }} className="rounded p-1 text-slate-400 hover:text-medwork-cyan hover:bg-cyan-50">✏️</button>
+                <button onClick={() => handleDelete(entry.id)} className="rounded p-1 text-slate-400 hover:text-red-500 hover:bg-red-50">🗑️</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SideCard({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
   return (<div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center gap-2.5 border-b border-slate-100 px-4 py-3"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-50 text-sm shadow-sm">{icon}</span><h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">{title}</h3></div><div>{children}</div></div>);
 }
@@ -1826,6 +2031,12 @@ export default function WorkerDetailsPage({ worker, currentPage, onNavigate, onL
               {(isSuperAdmin || permissions.includes("*") || permissions.includes("medical.expositions")) && (
                 <ExpositionsCard workerId={worker.id} />
               )}
+              {/* Groupage sanguin */}
+              <BloodGroupCard worker={worker} onUpdate={(bg) => {}} />
+
+              {/* Parcours professionnel */}
+              <ProfessionalHistoryCard worker={worker} onUpdate={(h) => {}} />
+
               {/* Dernières visites */}
               {(isSuperAdmin || permissions.includes("*") || permissions.includes("medical.lastvisits") || permissions.includes("visits.view")) && (
                 <SideCard title="Dernières visites" icon="🗓️">
