@@ -25,9 +25,15 @@ type Props = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function parseDMY(s: string): Date | null {
   if (!s) return null;
-  const [d, m, y] = s.split("/").map(Number);
-  if (!d || !m || !y) return null;
-  return new Date(y, m - 1, d);
+  // Format DD/MM/YYYY
+  if (s.includes("/")) {
+    const [d, m, y] = s.split("/").map(Number);
+    if (!d || !m || !y) return null;
+    return new Date(y, m - 1, d);
+  }
+  // Format ISO YYYY-MM-DD ou datetime
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function todayStr() {
