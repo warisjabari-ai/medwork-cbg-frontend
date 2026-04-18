@@ -101,10 +101,6 @@ function StatCard({ label, value, sub, color, icon, onClick }: {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function DashboardPage({
