@@ -41,19 +41,28 @@ const MOIS_FR = ["Jan","Fév","Mar","Avr","Mai","Jun","Juil","Aoû","Sep","Oct",
 function BarChart({ data }: { data: { label: string; value: number; current?: boolean }[] }) {
   const max = Math.max(...data.map(d => d.value), 1);
   return (
-    <div className="flex items-end gap-1.5 h-32 w-full">
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 120, width: '100%' }}>
       {data.map((d, i) => {
         const pct = (d.value / max) * 100;
         return (
-          <div key={i} className="flex flex-1 flex-col items-center gap-1">
-            <span className="text-[9px] text-slate-500 font-semibold">{d.value > 0 ? d.value : ""}</span>
-            <div className="w-full relative flex items-end" style={{ height: "88px" }}>
-              <div
-                className={`w-full rounded-t-lg transition-all ${d.current ? "bg-medwork-cyan" : "bg-medwork-navy/20 hover:bg-medwork-navy/40"}`}
-                style={{ height: `${Math.max(pct, d.value > 0 ? 4 : 0)}%` }}
-              />
+          <div key={i} style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: d.value > 0 ? (d.current ? '#00aadd' : '#9aa3ae') : 'transparent' }}>{d.value}</span>
+            <div style={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'flex-end', height: 80 }}>
+              <div style={{
+                width: '100%',
+                borderRadius: '3px 3px 0 0',
+                height: `${Math.max(pct, d.value > 0 ? 4 : 0)}%`,
+                background: d.current ? '#00aadd' : 'rgba(12,30,48,0.08)',
+                transition: 'all 0.3s ease',
+              }} />
             </div>
-            <span className={`text-[9px] font-semibold ${d.current ? "text-medwork-cyan" : "text-slate-400"}`}>{d.label}</span>
+            <span style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 9,
+              fontWeight: d.current ? 500 : 300,
+              color: d.current ? '#00aadd' : '#b8c0ca',
+              letterSpacing: '0.02em',
+            }}>{d.label}</span>
           </div>
         );
       })}
@@ -69,15 +78,29 @@ function StatCard({ label, value, sub, color, icon, onClick }: {
   return (
     <div
       onClick={onClick}
-      className={`rounded-2xl bg-white p-5 shadow-sm border border-slate-100 ${onClick ? "cursor-pointer hover:shadow-md transition" : ""}`}
+      style={{
+        background: 'white',
+        border: '1px solid #eef0f3',
+        borderRadius: 10,
+        padding: '20px 22px',
+        cursor: onClick ? 'pointer' : undefined,
+        transition: 'all 0.18s ease',
+        boxShadow: '0 1px 3px rgba(12,30,48,0.04)',
+      }}
+      onMouseEnter={e => { if (onClick) { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,170,221,0.2)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(12,30,48,0.08)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-1px)'; } }}
+      onMouseLeave={e => { if (onClick) { (e.currentTarget as HTMLDivElement).style.borderColor = '#eef0f3'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(12,30,48,0.04)'; (e.currentTarget as HTMLDivElement).style.transform = 'none'; } }}
     >
-      <div className="flex items-start justify-between">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-          <p className={`mt-1 text-3xl font-bold ${color}`}>{value}</p>
-          {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9aa3ae', margin: '0 0 8px' }}>{label}</p>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 400, color: '#0c1e30', lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}>{value}</p>
+          {sub && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '5px 0 0' }}>{sub}</p>}
         </div>
-        <span className="text-2xl">{icon}</span>
+        <span style={{ fontSize: 20, opacity: 0.3 }}>{icon}</span>
+      </div>
+    </div>
+  );
+}
       </div>
     </div>
   );
@@ -161,7 +184,7 @@ export default function DashboardPage({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden" style={{ background: '#f7f8fa' }}>
       <Sidebar currentPage={currentPage} onNavigate={onNavigate} onLogout={onLogout}
         userName={userName} userRole={userRole} userPhoto={userPhoto}
         isSuperAdmin={isSuperAdmin} permissions={permissions} />
@@ -171,10 +194,10 @@ export default function DashboardPage({
           searchData={searchData} permissions={permissions} isSuperAdmin={isSuperAdmin}
           onOpenWorker={onOpenWorker} onOpenVisit={onOpenVisit} />
 
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto" style={{ padding: '28px 32px' }}>
 
           {/* ── Cartes statistiques ── */}
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" style={{ marginBottom: 20 }}>
             <StatCard
               label="Travailleurs actifs" value={stats.actifs}
               sub={`${workers.length} au total`}
@@ -201,18 +224,28 @@ export default function DashboardPage({
           </div>
 
           {/* ── Graphique évolution mensuelle ── */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
-            <div className="flex items-center justify-between mb-4">
+          <div style={{ background: 'white', border: '1px solid #eef0f3', borderRadius: 10, padding: '22px 24px', marginBottom: 20, boxShadow: '0 1px 3px rgba(12,30,48,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <h2 className="text-sm font-bold text-medwork-navy">Évolution mensuelle des consultations</h2>
-                <p className="text-xs text-slate-400 mt-0.5">12 derniers mois</p>
+                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 400, color: '#0c1e30', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
+                  Évolution des consultations
+                </h2>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, fontWeight: 300, color: '#9aa3ae', margin: 0 }}>12 derniers mois</p>
               </div>
-              <span className="rounded-full bg-medwork-cyan/10 px-3 py-1 text-xs font-semibold text-medwork-cyan">
-                {allVisits.length} visite{allVisits.length > 1 ? "s" : ""} au total
+              <span style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: 11,
+                fontWeight: 400,
+                color: '#00aadd',
+                background: 'rgba(0,170,221,0.08)',
+                padding: '4px 10px',
+                borderRadius: 20,
+              }}>
+                {allVisits.length} visite{allVisits.length > 1 ? "s" : ""}
               </span>
             </div>
             {allVisits.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-sm text-slate-400">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 100, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#b8c0ca', fontWeight: 300 }}>
                 Aucune visite enregistrée
               </div>
             ) : (
@@ -220,27 +253,51 @@ export default function DashboardPage({
             )}
           </div>
 
-          {/* ── Deux colonnes : dernières visites + répartition aptitudes ── */}
-          <div className="grid gap-5 md:grid-cols-2">
+          {/* ── Deux colonnes ── */}
+          <div className="grid gap-4 md:grid-cols-2">
 
             {/* Dernières visites */}
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
-              <h2 className="mb-4 text-sm font-bold text-medwork-navy">Dernières visites</h2>
+            <div style={{ background: 'white', border: '1px solid #eef0f3', borderRadius: 10, padding: '22px 24px', boxShadow: '0 1px 3px rgba(12,30,48,0.04)' }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 400, color: '#0c1e30', margin: '0 0 16px', letterSpacing: '-0.01em' }}>
+                Dernières visites
+              </h2>
               {recentVisits.length === 0 ? (
-                <p className="text-sm text-slate-400">Aucune visite enregistrée.</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#b8c0ca', fontWeight: 300 }}>Aucune visite enregistrée.</p>
               ) : (
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {recentVisits.map(v => (
                     <div key={v.id}
                       onClick={() => onNavigate("visits")}
-                      className="flex items-center gap-3 rounded-xl border border-slate-100 px-4 py-3 hover:bg-slate-50 cursor-pointer transition"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        borderRadius: 8,
+                        border: '1px solid #f0f2f5',
+                        padding: '10px 14px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        background: 'transparent',
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,170,221,0.15)'; (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,170,221,0.02)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = '#f0f2f5'; (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 truncate">{workerName(v.workerId)}</p>
-                        <p className="text-xs text-slate-400">{v.type} · {v.date}</p>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 400, color: '#0c1e30', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{workerName(v.workerId)}</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '2px 0 0' }}>{v.type} · {v.date}</p>
                       </div>
                       {v.aptitude && (
-                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${aptColor(v.aptitude)}`}>
+                        <span style={{
+                          flexShrink: 0,
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 10,
+                          fontWeight: 500,
+                          padding: '3px 9px',
+                          borderRadius: 20,
+                          background: 'rgba(0,170,221,0.08)',
+                          color: '#0077aa',
+                          letterSpacing: '0.02em',
+                        }}>
                           {v.aptitude}
                         </span>
                       )}
@@ -248,21 +305,42 @@ export default function DashboardPage({
                   ))}
                 </div>
               )}
-              <button onClick={() => onNavigate("visits")}
-                className="mt-4 w-full rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 transition">
+              <button
+                onClick={() => onNavigate("visits")}
+                style={{
+                  marginTop: 14,
+                  width: '100%',
+                  padding: '9px 0',
+                  borderRadius: 8,
+                  border: '1px solid #eef0f3',
+                  background: 'transparent',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 11.5,
+                  fontWeight: 300,
+                  color: '#9aa3ae',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  letterSpacing: '0.02em',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#00aadd'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,170,221,0.25)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#9aa3ae'; (e.currentTarget as HTMLButtonElement).style.borderColor = '#eef0f3'; }}
+              >
                 Voir toutes les visites →
               </button>
             </div>
 
             {/* Répartition des aptitudes ce mois */}
-            <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
-              <h2 className="mb-4 text-sm font-bold text-medwork-navy">
-                Aptitudes — {MOIS_FR[currentMonth]} {currentYear}
+            <div style={{ background: 'white', border: '1px solid #eef0f3', borderRadius: 10, padding: '22px 24px', boxShadow: '0 1px 3px rgba(12,30,48,0.04)' }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 400, color: '#0c1e30', margin: '0 0 4px', letterSpacing: '-0.01em' }}>
+                Aptitudes médicales
               </h2>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, fontWeight: 300, color: '#9aa3ae', margin: '0 0 18px' }}>
+                {MOIS_FR[currentMonth]} {currentYear}
+              </p>
               {Object.keys(stats.aptitudes).length === 0 ? (
-                <p className="text-sm text-slate-400">Aucune aptitude saisie ce mois.</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#b8c0ca', fontWeight: 300 }}>Aucune aptitude saisie ce mois.</p>
               ) : (
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {Object.entries(stats.aptitudes)
                     .sort((a, b) => b[1] - a[1])
                     .map(([label, count]) => {
@@ -270,15 +348,12 @@ export default function DashboardPage({
                       const pct = Math.round((count / total) * 100);
                       return (
                         <div key={label}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-semibold text-slate-700">{label}</span>
-                            <span className="text-xs text-slate-400">{count} ({pct}%)</span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 300, color: '#0c1e30' }}>{label}</span>
+                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10.5, color: '#9aa3ae' }}>{count} <span style={{ opacity: 0.6 }}>({pct}%)</span></span>
                           </div>
-                          <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-medwork-cyan transition-all"
-                              style={{ width: `${pct}%` }}
-                            />
+                          <div style={{ height: 3, width: '100%', borderRadius: 2, background: '#f0f2f5', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', borderRadius: 2, background: '#00aadd', width: `${pct}%`, transition: 'width 0.4s ease' }} />
                           </div>
                         </div>
                       );

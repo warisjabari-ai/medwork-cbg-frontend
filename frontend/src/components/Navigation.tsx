@@ -170,26 +170,83 @@ export function QuickActionMenu({ onNavigate }: { onNavigate: (page: AppPage) =>
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white bg-medwork-cyan hover:opacity-90 shadow-md transition ${open ? "opacity-90" : ""}`}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '7px 14px',
+          borderRadius: 8,
+          border: 'none',
+          background: '#0c1e30',
+          color: 'white',
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 12,
+          fontWeight: 400,
+          letterSpacing: '0.03em',
+          cursor: 'pointer',
+          transition: 'all 0.18s ease',
+          whiteSpace: 'nowrap',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#00aadd'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#0c1e30'; }}
       >
-        <Icon d={icons.plus} size={15} />
+        <Icon d={icons.plus} size={13} />
         <span>Nouveau</span>
-        <Icon d={icons.chevDown} size={13} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-64 rounded-xl border border-slate-100 bg-white p-1.5 shadow-xl">
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: 'calc(100% + 8px)',
+          zIndex: 50,
+          width: 240,
+          borderRadius: 10,
+          border: '1px solid #e8ecf0',
+          background: 'white',
+          padding: 6,
+          boxShadow: '0 8px 32px rgba(12,30,48,0.1), 0 2px 8px rgba(12,30,48,0.06)',
+        }}>
           {[
             { icon: "stethoscope" as const, label: "Nouvelle consultation", sub: "Créer une visite médicale", page: "visits" as AppPage },
-            { icon: "userPlus" as const,    label: "Nouveau travailleur",   sub: "Ajouter un dossier travailleur", page: "workerForm" as AppPage },
+            { icon: "userPlus" as const,    label: "Nouveau travailleur",   sub: "Ajouter un dossier", page: "workerForm" as AppPage },
           ].map(({ icon, label, sub, page }) => (
-            <button key={label} onClick={() => { setOpen(false); onNavigate(page); }} className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition hover:bg-slate-50">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-medwork-cyan">
-                <Icon d={icons[icon]} size={16} />
+            <button
+              key={label}
+              onClick={() => { setOpen(false); onNavigate(page); }}
+              style={{
+                display: 'flex',
+                width: '100%',
+                alignItems: 'flex-start',
+                gap: 10,
+                borderRadius: 7,
+                padding: '9px 10px',
+                textAlign: 'left',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background 0.15s ease',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#f7f8fa'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+            >
+              <span style={{
+                marginTop: 1,
+                display: 'flex',
+                width: 30,
+                height: 30,
+                flexShrink: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 7,
+                background: 'rgba(0,170,221,0.08)',
+                color: '#00aadd',
+              }}>
+                <Icon d={icons[icon]} size={14} />
               </span>
               <span>
-                <p className="text-sm font-semibold text-slate-800">{label}</p>
-                <p className="text-[11px] text-slate-400">{sub}</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 400, color: '#0c1e30', margin: 0, lineHeight: 1.3 }}>{label}</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '2px 0 0' }}>{sub}</p>
               </span>
             </button>
           ))}
@@ -235,42 +292,101 @@ export function Sidebar({
   const canAny = (...perms: string[]) => perms.some(can);
   const canSome = (prefix: string) => isSuperAdmin || permissions.includes("*") || permissions.some(p => p === prefix || p.startsWith(prefix + "."));
 
-  const NavItem = ({ page, icon, label, indent = false }: { page: AppPage; icon: keyof typeof icons; label: string; indent?: boolean }) => (
-    <button
-      onClick={() => onNavigate(page)}
-      title={collapsed ? label : undefined}
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all
-        ${indent && !collapsed ? "pl-8" : ""}
-        ${active === page ? "bg-medwork-cyan text-white shadow-md shadow-cyan-900/30" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
-    >
-      <span className="shrink-0"><Icon d={icons[icon]} size={16} /></span>
-      {!collapsed && <span className="truncate">{label}</span>}
-    </button>
-  );
+  const NavItem = ({ page, icon, label, indent = false }: { page: AppPage; icon: keyof typeof icons; label: string; indent?: boolean }) => {
+    const isActive = active === page;
+    return (
+      <button
+        onClick={() => onNavigate(page)}
+        title={collapsed ? label : undefined}
+        style={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          gap: 9,
+          padding: collapsed ? '8px 0' : '7px 10px',
+          paddingLeft: !collapsed && indent && !collapsed ? 10 : collapsed ? 0 : 10,
+          borderRadius: 6,
+          border: 'none',
+          cursor: 'pointer',
+          marginBottom: 1,
+          justifyContent: collapsed ? 'center' : undefined,
+          background: isActive ? 'rgba(0,170,221,0.15)' : 'transparent',
+          color: isActive ? '#00aadd' : 'rgba(255,255,255,0.45)',
+          transition: 'all 0.15s ease',
+          position: 'relative',
+        }}
+        onMouseEnter={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.85)';
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isActive) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)';
+          }
+        }}
+      >
+        {isActive && !collapsed && (
+          <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2, height: 16, background: '#00aadd', borderRadius: 1 }} />
+        )}
+        <span style={{ flexShrink: 0, display: 'flex' }}><Icon d={icons[icon]} size={15} /></span>
+        {!collapsed && (
+          <span style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 12.5,
+            fontWeight: isActive ? 400 : 300,
+            letterSpacing: '0.01em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>{label}</span>
+        )}
+      </button>
+    );
+  };
 
-  const SectionLabel = ({ label, icon }: { label: string; icon: keyof typeof icons }) =>
-    collapsed ? <div className="my-2 mx-3 h-px bg-white/10" /> : (
-      <div className="mt-5 mb-1 flex items-center gap-2 px-3">
-        <Icon d={icons[icon]} size={12} />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</span>
+  const SectionLabel = ({ label }: { label: string; icon: keyof typeof icons }) =>
+    collapsed ? <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '12px 6px' }} /> : (
+      <div style={{ marginTop: 20, marginBottom: 4, padding: '0 10px' }}>
+        <span style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 9,
+          fontWeight: 500,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.2)',
+        }}>{label}</span>
       </div>
     );
 
   return (
-    <aside className={`relative flex h-screen flex-col bg-medwork-navy text-white transition-all duration-300 ${collapsed ? "w-[68px]" : "w-64"}`}>
+    <aside
+      className={`relative flex h-screen flex-col transition-all duration-300 ${collapsed ? "w-[64px]" : "w-[220px]"}`}
+      style={{ background: '#0a1a28', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+    >
       {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-medwork-cyan text-sm font-black">M</div>
+      <div className={`flex h-14 shrink-0 items-center gap-3 ${collapsed ? "justify-center px-0" : "px-5"}`}
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{
+          width: 28, height: 28, flexShrink: 0,
+          border: '1px solid rgba(0,170,221,0.4)',
+          borderRadius: 6,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", color: '#00aadd', fontSize: 16, fontWeight: 400, lineHeight: 1 }}>M</span>
+        </div>
         {!collapsed && (
           <div>
-            <p className="text-base font-bold leading-tight">MédWork</p>
-            <p className="text-[10px] text-cyan-300">CBG · Médecine du travail</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: '0.06em', color: 'rgba(255,255,255,0.88)', lineHeight: 1.2 }}>MédWork CBG</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, fontWeight: 300, letterSpacing: '0.04em', color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>Médecine du travail</p>
           </div>
         )}
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4" style={{ padding: collapsed ? '16px 10px' : '16px 10px' }}>
         <NavItem page="dashboard" icon="dashboard" label="Tableau de bord" />
 
         {canAny("workers.view", "visits.view") && <SectionLabel label="Dossier Médical" icon="folder" />}
@@ -285,27 +401,30 @@ export function Sidebar({
         )}
 
         {canAny("settings.visitTypes", "settings.decisions", "settings.examTypes") && <SectionLabel label="Paramètres" icon="settings" />}
-        {can("settings.visitTypes") && <NavItem page="visitTypes" icon="visitType" label="Types de visite médicale" indent />}
+        {can("settings.visitTypes") && <NavItem page="visitTypes" icon="visitType" label="Types de visite" indent />}
         {can("settings.decisions")  && <NavItem page="decisions"  icon="decisions" label="Décisions" indent />}
         {can("settings.examTypes")  && <NavItem page="examTypes"  icon="examTypes" label="Types d'examens" indent />}
 
         {canAny("admin.roles", "admin.users") && <SectionLabel label="Utilisateurs" icon="userGroup" />}
         {can("admin.roles") && <NavItem page="roles"          icon="roles"  label="Rôles"                    indent />}
-        {can("admin.users") && <NavItem page="userManagement" icon="users"  label="Gestion des utilisateurs" indent />}
+        {can("admin.users") && <NavItem page="userManagement" icon="users"  label="Utilisateurs" indent />}
       </nav>
 
       {/* Profil */}
-      <div className="shrink-0 border-t border-white/10 px-3 py-3">
+      <div className="shrink-0 px-2 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <ProfilePopover collapsed={collapsed} userName={userName} userRole={userRole} userPhoto={userPhoto} isSuperAdmin={isSuperAdmin} onLogout={onLogout} onNavigate={onNavigate} />
       </div>
 
       {/* Bouton réduire/développer */}
       <button
         onClick={() => setCollapsed((v) => !v)}
-        className="absolute -right-3 top-20 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-medwork-navy text-slate-300 shadow-lg transition hover:bg-medwork-cyan hover:text-white"
+        className="absolute -right-3 top-16 z-10 flex h-6 w-6 items-center justify-center rounded-full transition"
+        style={{ background: '#0a1a28', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)' }}
         title={collapsed ? "Développer" : "Réduire"}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#00aadd'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,170,221,0.4)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.4)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.12)'; }}
       >
-        <Icon d={collapsed ? icons.chevRight : icons.chevLeft} size={12} />
+        <Icon d={collapsed ? icons.chevRight : icons.chevLeft} size={11} />
       </button>
     </aside>
   );
@@ -631,24 +750,69 @@ export function AppHeader({
           onOpenVisit={onOpenVisit}
         />
       )}
-      <header className="flex h-16 shrink-0 items-center justify-between gap-4 bg-white px-6 shadow-sm">
-        <div className="flex shrink-0 items-center gap-3">
+      <header style={{
+        display: 'flex',
+        height: 56,
+        flexShrink: 0,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        background: 'white',
+        borderBottom: '1px solid #eef0f3',
+        padding: '0 28px',
+      }}>
+        <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: 12 }}>
           {left}
           <div>
-            <h2 className="text-lg font-bold text-medwork-navy leading-tight">{title}</h2>
-            {subtitle && <p className="text-[11px] text-slate-400">{subtitle}</p>}
+            <h2 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 20,
+              fontWeight: 400,
+              color: '#0c1e30',
+              lineHeight: 1.1,
+              margin: 0,
+              letterSpacing: '-0.01em',
+            }}>{title}</h2>
+            {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '2px 0 0', letterSpacing: '0.01em' }}>{subtitle}</p>}
           </div>
         </div>
-        <div className="flex flex-1 items-center justify-end gap-3">
+        <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 10 }}>
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex w-full max-w-sm items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-400 transition hover:border-medwork-cyan hover:bg-white hover:text-slate-600"
+            style={{
+              display: 'flex',
+              width: '100%',
+              maxWidth: 280,
+              alignItems: 'center',
+              gap: 8,
+              borderRadius: 8,
+              border: '1px solid #e8ecf0',
+              background: '#f7f8fa',
+              padding: '7px 14px',
+              cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 12.5,
+              fontWeight: 300,
+              color: '#b0b8c4',
+              transition: 'all 0.18s ease',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#00aadd'; (e.currentTarget as HTMLButtonElement).style.background = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e8ecf0'; (e.currentTarget as HTMLButtonElement).style.background = '#f7f8fa'; }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-4 w-4 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} style={{ width: 14, height: 14, flexShrink: 0 }}>
               <path d="M21 21l-4.35-4.35 M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
-            <span className="flex-1 text-left">Rechercher…</span>
-            <kbd className="hidden rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 ring-1 ring-slate-200 sm:block">⌘K</kbd>
+            <span style={{ flex: 1, textAlign: 'left' }}>Rechercher…</span>
+            <kbd style={{
+              display: 'none',
+              borderRadius: 4,
+              background: 'white',
+              padding: '2px 6px',
+              fontSize: 10,
+              fontFamily: "'DM Mono', monospace",
+              color: '#9aa3ae',
+              border: '1px solid #e8ecf0',
+            }} className="sm:!inline-block">⌘K</kbd>
           </button>
           <QuickActionMenu onNavigate={onNavigate} />
         </div>
