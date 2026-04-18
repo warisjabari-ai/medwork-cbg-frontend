@@ -168,85 +168,31 @@ export function QuickActionMenu({ onNavigate }: { onNavigate: (page: AppPage) =>
 
   return (
     <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '7px 14px',
-          borderRadius: 8,
-          border: 'none',
-          background: '#0c1e30',
-          color: 'white',
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 12,
-          fontWeight: 400,
-          letterSpacing: '0.03em',
-          cursor: 'pointer',
-          transition: 'all 0.18s ease',
-          whiteSpace: 'nowrap',
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#00aadd'; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#0c1e30'; }}
+      <button onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-white transition"
+        style={{ background: '#00aadd', border: 'none', cursor: 'pointer', fontSize: 13 }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background='#0099cc'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background='#00aadd'; }}
       >
-        <Icon d={icons.plus} size={13} />
+        <Icon d={icons.plus} size={14} />
         <span>Nouveau</span>
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute',
-          right: 0,
-          top: 'calc(100% + 8px)',
-          zIndex: 50,
-          width: 240,
-          borderRadius: 10,
-          border: '1px solid #e8ecf0',
-          background: 'white',
-          padding: 6,
-          boxShadow: '0 8px 32px rgba(12,30,48,0.1), 0 2px 8px rgba(12,30,48,0.06)',
-        }}>
+        <div className="absolute right-0 z-50 mt-1 w-56 rounded-xl border border-slate-100 bg-white p-1.5"
+          style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.1)', top: 'calc(100% + 4px)' }}>
           {[
             { icon: "stethoscope" as const, label: "Nouvelle consultation", sub: "Créer une visite médicale", page: "visits" as AppPage },
-            { icon: "userPlus" as const,    label: "Nouveau travailleur",   sub: "Ajouter un dossier", page: "workerForm" as AppPage },
+            { icon: "userPlus" as const, label: "Nouveau travailleur", sub: "Ajouter un dossier", page: "workerForm" as AppPage },
           ].map(({ icon, label, sub, page }) => (
-            <button
-              key={label}
-              onClick={() => { setOpen(false); onNavigate(page); }}
-              style={{
-                display: 'flex',
-                width: '100%',
-                alignItems: 'flex-start',
-                gap: 10,
-                borderRadius: 7,
-                padding: '9px 10px',
-                textAlign: 'left',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background 0.15s ease',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#f7f8fa'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-            >
-              <span style={{
-                marginTop: 1,
-                display: 'flex',
-                width: 30,
-                height: 30,
-                flexShrink: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 7,
-                background: 'rgba(0,170,221,0.08)',
-                color: '#00aadd',
-              }}>
+            <button key={label} onClick={() => { setOpen(false); onNavigate(page); }}
+              className="flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition hover:bg-slate-50">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-medwork-cyan">
                 <Icon d={icons[icon]} size={14} />
               </span>
               <span>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 400, color: '#0c1e30', margin: 0, lineHeight: 1.3 }}>{label}</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '2px 0 0' }}>{sub}</p>
+                <p className="text-sm font-medium text-slate-800">{label}</p>
+                <p className="text-xs text-slate-400">{sub}</p>
               </span>
             </button>
           ))}
@@ -298,131 +244,66 @@ export function Sidebar({
       <button
         onClick={() => onNavigate(page)}
         title={collapsed ? label : undefined}
-        style={{
-          display: 'flex',
-          width: '100%',
-          alignItems: 'center',
-          gap: 9,
-          padding: collapsed ? '8px 0' : '7px 10px',
-          paddingLeft: !collapsed && indent && !collapsed ? 10 : collapsed ? 0 : 10,
-          borderRadius: 6,
-          border: 'none',
-          cursor: 'pointer',
-          marginBottom: 1,
-          justifyContent: collapsed ? 'center' : undefined,
-          background: isActive ? 'rgba(0,170,221,0.15)' : 'transparent',
-          color: isActive ? '#00aadd' : 'rgba(255,255,255,0.45)',
-          transition: 'all 0.15s ease',
-          position: 'relative',
-        }}
-        onMouseEnter={e => {
-          if (!isActive) {
-            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.85)';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isActive) {
-            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)';
-          }
-        }}
+        className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all ${collapsed ? "justify-center" : ""} ${isActive ? "bg-medwork-cyan/20 text-medwork-cyan" : "text-slate-400 hover:bg-white/8 hover:text-slate-200"}`}
+        style={{ fontSize: 13, fontWeight: isActive ? 500 : 400, border: 'none', cursor: 'pointer', position: 'relative', marginBottom: 1 }}
       >
-        {isActive && !collapsed && (
-          <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2, height: 16, background: '#00aadd', borderRadius: 1 }} />
-        )}
-        <span style={{ flexShrink: 0, display: 'flex' }}><Icon d={icons[icon]} size={15} /></span>
-        {!collapsed && (
-          <span style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12.5,
-            fontWeight: isActive ? 400 : 300,
-            letterSpacing: '0.01em',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>{label}</span>
-        )}
+        {isActive && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-medwork-cyan rounded-r" />}
+        <span className="shrink-0 flex"><Icon d={icons[icon]} size={15} /></span>
+        {!collapsed && <span className="truncate">{label}</span>}
       </button>
     );
   };
 
   const SectionLabel = ({ label }: { label: string; icon: keyof typeof icons }) =>
-    collapsed ? <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '12px 6px' }} /> : (
-      <div style={{ marginTop: 20, marginBottom: 4, padding: '0 10px' }}>
-        <span style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 9,
-          fontWeight: 500,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.2)',
-        }}>{label}</span>
-      </div>
+    collapsed ? <div className="my-2 mx-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} /> : (
+      <p className="mt-4 mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.1em' }}>{label}</p>
     );
 
   return (
-    <aside
-      className={`relative flex h-screen flex-col transition-all duration-300 ${collapsed ? "w-[64px]" : "w-[220px]"}`}
-      style={{ background: '#0a1a28', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-    >
+    <aside className={`relative flex h-screen flex-col bg-medwork-navy transition-all duration-200 ${collapsed ? "w-[60px]" : "w-[224px]"}`}
+      style={{ borderRight: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+
       {/* Logo */}
-      <div className={`flex h-14 shrink-0 items-center gap-3 ${collapsed ? "justify-center px-0" : "px-5"}`}
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{
-          width: 28, height: 28, flexShrink: 0,
-          border: '1px solid rgba(0,170,221,0.4)',
-          borderRadius: 6,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", color: '#00aadd', fontSize: 16, fontWeight: 400, lineHeight: 1 }}>M</span>
-        </div>
+      <div className={`flex h-14 shrink-0 items-center gap-2.5 border-b px-3`}
+        style={{ borderColor: 'rgba(255,255,255,0.08)', justifyContent: collapsed ? 'center' : undefined }}>
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-medwork-cyan font-bold text-white text-sm">M</div>
         {!collapsed && (
           <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: '0.06em', color: 'rgba(255,255,255,0.88)', lineHeight: 1.2 }}>MédWork CBG</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, fontWeight: 300, letterSpacing: '0.04em', color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>Médecine du travail</p>
+            <p className="text-sm font-semibold text-white leading-tight">MédWork CBG</p>
+            <p className="text-[10px] font-normal leading-tight" style={{ color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>Médecine du travail</p>
           </div>
         )}
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4" style={{ padding: collapsed ? '16px 10px' : '16px 10px' }}>
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-0.5">
         <NavItem page="dashboard" icon="dashboard" label="Tableau de bord" />
-
         {canAny("workers.view", "visits.view") && <SectionLabel label="Dossier Médical" icon="folder" />}
-        {can("workers.view") && <NavItem page="workers" icon="workers" label="Travailleurs" indent />}
-        {can("visits.view")  && <NavItem page="visits"  icon="visits"  label="Visites médicales" indent />}
-
+        {can("workers.view") && <NavItem page="workers" icon="workers" label="Travailleurs" />}
+        {can("visits.view")  && <NavItem page="visits"  icon="visits"  label="Visites médicales" />}
         {canAny("reports.view", "reports.prescriptions", "reports.aptitudes") && (
-          <>
-            <SectionLabel label="Rapports" icon="reports" />
-            <NavItem page="reports" icon="reports" label="Rapports" indent />
-          </>
+          <><SectionLabel label="Rapports" icon="reports" /><NavItem page="reports" icon="reports" label="Rapports" /></>
         )}
-
         {canAny("settings.visitTypes", "settings.decisions", "settings.examTypes") && <SectionLabel label="Paramètres" icon="settings" />}
-        {can("settings.visitTypes") && <NavItem page="visitTypes" icon="visitType" label="Types de visite" indent />}
-        {can("settings.decisions")  && <NavItem page="decisions"  icon="decisions" label="Décisions" indent />}
-        {can("settings.examTypes")  && <NavItem page="examTypes"  icon="examTypes" label="Types d'examens" indent />}
-
+        {can("settings.visitTypes") && <NavItem page="visitTypes" icon="visitType" label="Types de visite" />}
+        {can("settings.decisions")  && <NavItem page="decisions"  icon="decisions" label="Décisions" />}
+        {can("settings.examTypes")  && <NavItem page="examTypes"  icon="examTypes" label="Types d'examens" />}
         {canAny("admin.roles", "admin.users") && <SectionLabel label="Utilisateurs" icon="userGroup" />}
-        {can("admin.roles") && <NavItem page="roles"          icon="roles"  label="Rôles"                    indent />}
-        {can("admin.users") && <NavItem page="userManagement" icon="users"  label="Utilisateurs" indent />}
+        {can("admin.roles") && <NavItem page="roles"          icon="roles"  label="Rôles" />}
+        {can("admin.users") && <NavItem page="userManagement" icon="users"  label="Utilisateurs" />}
       </nav>
 
       {/* Profil */}
-      <div className="shrink-0 px-2 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="shrink-0 p-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
         <ProfilePopover collapsed={collapsed} userName={userName} userRole={userRole} userPhoto={userPhoto} isSuperAdmin={isSuperAdmin} onLogout={onLogout} onNavigate={onNavigate} />
       </div>
 
-      {/* Bouton réduire/développer */}
-      <button
-        onClick={() => setCollapsed((v) => !v)}
-        className="absolute -right-3 top-16 z-10 flex h-6 w-6 items-center justify-center rounded-full transition"
-        style={{ background: '#0a1a28', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)' }}
-        title={collapsed ? "Développer" : "Réduire"}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#00aadd'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,170,221,0.4)'; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.4)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.12)'; }}
+      {/* Toggle */}
+      <button onClick={() => setCollapsed(v => !v)}
+        className="absolute -right-3 top-16 z-10 flex h-6 w-6 items-center justify-center rounded-full border bg-medwork-navy transition"
+        style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color='#00aadd'; (e.currentTarget as HTMLButtonElement).style.borderColor='rgba(0,170,221,0.5)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color='rgba(255,255,255,0.5)'; (e.currentTarget as HTMLButtonElement).style.borderColor='rgba(255,255,255,0.15)'; }}
       >
         <Icon d={collapsed ? icons.chevRight : icons.chevLeft} size={11} />
       </button>
@@ -750,69 +631,27 @@ export function AppHeader({
           onOpenVisit={onOpenVisit}
         />
       )}
-      <header style={{
-        display: 'flex',
-        height: 56,
-        flexShrink: 0,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 16,
-        background: 'white',
-        borderBottom: '1px solid #eef0f3',
-        padding: '0 28px',
-      }}>
-        <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: 12 }}>
+      <header className="flex h-14 shrink-0 items-center justify-between gap-4 bg-white px-6"
+        style={{ borderBottom: '1px solid #e2e6ea' }}>
+        <div className="flex shrink-0 items-center gap-3">
           {left}
           <div>
-            <h2 style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 20,
-              fontWeight: 400,
-              color: '#0c1e30',
-              lineHeight: 1.1,
-              margin: 0,
-              letterSpacing: '-0.01em',
-            }}>{title}</h2>
-            {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 300, color: '#9aa3ae', margin: '2px 0 0', letterSpacing: '0.01em' }}>{subtitle}</p>}
+            <h2 className="text-base font-semibold text-medwork-navy leading-tight">{title}</h2>
+            {subtitle && <p className="text-xs text-slate-400 font-normal mt-0.5">{subtitle}</p>}
           </div>
         </div>
-        <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 10 }}>
-          <button
-            onClick={() => setSearchOpen(true)}
-            style={{
-              display: 'flex',
-              width: '100%',
-              maxWidth: 280,
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 8,
-              border: '1px solid #e8ecf0',
-              background: '#f7f8fa',
-              padding: '7px 14px',
-              cursor: 'pointer',
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 12.5,
-              fontWeight: 300,
-              color: '#b0b8c4',
-              transition: 'all 0.18s ease',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#00aadd'; (e.currentTarget as HTMLButtonElement).style.background = 'white'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e8ecf0'; (e.currentTarget as HTMLButtonElement).style.background = '#f7f8fa'; }}
+        <div className="flex flex-1 items-center justify-end gap-2.5">
+          <button onClick={() => setSearchOpen(true)}
+            className="flex w-full max-w-xs items-center gap-2 rounded-lg border bg-slate-50 px-3 py-1.5 text-sm text-slate-400 transition"
+            style={{ borderColor: '#e2e6ea', fontSize: 13 }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor='#00aadd'; (e.currentTarget as HTMLButtonElement).style.background='white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor='#e2e6ea'; (e.currentTarget as HTMLButtonElement).style.background='#f8fafc'; }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} style={{ width: 14, height: 14, flexShrink: 0 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-3.5 w-3.5 shrink-0">
               <path d="M21 21l-4.35-4.35 M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
-            <span style={{ flex: 1, textAlign: 'left' }}>Rechercher…</span>
-            <kbd style={{
-              display: 'none',
-              borderRadius: 4,
-              background: 'white',
-              padding: '2px 6px',
-              fontSize: 10,
-              fontFamily: "'DM Mono', monospace",
-              color: '#9aa3ae',
-              border: '1px solid #e8ecf0',
-            }} className="sm:!inline-block">⌘K</kbd>
+            <span className="flex-1 text-left">Rechercher…</span>
+            <kbd className="hidden rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 ring-1 ring-slate-200 sm:block">⌘K</kbd>
           </button>
           <QuickActionMenu onNavigate={onNavigate} />
         </div>
